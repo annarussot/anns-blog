@@ -3,17 +3,17 @@ FROM gradle:8.7-jdk21-alpine AS build
 WORKDIR /app
 
 # Copia solo i file di configurazione per cache delle dipendenze
-COPY build.gradle.kts settings.gradle.kts gradlew ./
+COPY build.gradle.kts settings.gradle.kts ./
 COPY gradle gradle
 
 # Download delle dipendenze (layer cacheable)
-RUN ./gradlew dependencies --no-daemon
+RUN gradle dependencies --no-daemon
 
 # Copia il codice sorgente
 COPY src src
 
 # Build dell'applicazione
-RUN ./gradlew clean bootJar -x test --no-daemon --parallel
+RUN gradle clean bootJar -x test --no-daemon --parallel
 
 # Stage 2: Runtime
 FROM eclipse-temurin:21-jre-alpine AS runtime
