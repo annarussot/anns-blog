@@ -25,7 +25,6 @@
         <ul>
             <li th:each="post : ${posts}">
                 <a th:href="@{/blog/{slug}(slug=${post.slug})}"><h2 th:text="${post.title}">Post Title </h2></a>
-                <p th:text="${post.content}">Post Content</p>
                 <small th:text="${post.date}">Post Date</small>
             </li>
         </ul>
