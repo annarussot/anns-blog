@@ -1,10 +1,9 @@
 ﻿package io.anna.annsblog.blog
 
 import org.springframework.http.ResponseEntity
-import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 
-@Controller
+@RestController
 @RequestMapping("/blog")
 class BlogController (
     private val blogService: BlogService
@@ -14,14 +13,37 @@ class BlogController (
     fun blog() = "Blog"
 
     @GetMapping("/{slug}")
-    fun blogPost(@PathVariable slug: String)
+    @ResponseBody
+    fun blogPost(@PathVariable slug: String) : PostDocument?
     {
-        blogService.getPostBySlug(slug)
+        return blogService.getPostBySlug(slug)
     }
+
+    data class BlogPostRequest(
+        val title: String,
+        val content: String
+    )
 
     @PostMapping("/new")
     @ResponseBody
-    fun newPost(): ResponseEntity<String> {
-        return ResponseEntity.ok("New post created")
+    fun newPost(@RequestBody request: BlogPostRequest): ResponseEntity<String> {
+        print(request)
+        return try {
+            val doc = blogService.createPost(title = request.title, content = request.content)
+            ResponseEntity.ok("Post created successfully: ${doc.slug}")
+        } catch (e: IllegalArgumentException) {
+            ResponseEntity.badRequest().body(e.message)
+        }
+    }
+
+    @DeleteMapping("/delete/{slug}")
+    @ResponseBody
+    fun deletePost(@PathVariable slug: String){
+        if(blogService.deletePost(slug)){
+            ResponseEntity.ok("Post deleted successfully")
+        } else {
+            ResponseEntity.notFound().build()
+        }
+
     }
 }

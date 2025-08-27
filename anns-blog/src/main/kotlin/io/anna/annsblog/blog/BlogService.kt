@@ -10,6 +10,7 @@ class BlogService (
     fun createPost(title: String, content: String): PostDocument {
         try {
             val newPost = PostDocument(title = title, content = content)
+            print(newPost.slug)
             return postRepo.save(newPost)
         } catch (e: DuplicateKeyException) {
             throw IllegalArgumentException("A post with the same title already exists.")
