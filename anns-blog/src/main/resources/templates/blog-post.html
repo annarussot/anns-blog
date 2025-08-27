@@ -1,0 +1,15 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Post</title>
+</head>
+<body>
+    <div>
+        <h1 th:text="${post.title}">Post Title</h1>
+        <p th:text="${post.content}">Post Content</p>
+        <small th:text="${post.date}">Post Date</small>
+    </div>
+    <a href="/blog">Go to Blog</a>
+</body>
+</html>

@@ -1,0 +1,38 @@
+﻿<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>BLOG</title>
+</head>
+<body>
+<!--/*@thymesVar id="error" type="java.lang.String"*/-->
+<!--/*@thymesVar id="deleted" type="java.lang.String"*/-->
+
+    <h1>Mini Ann's blog</h1>
+    <div th:if="${param.error != null}">
+        <span th:text="${param.error}"></span>
+    </div>
+
+    <div th:if="${param.deleted != null}">
+        <span th:text="${param.deleted}"></span>
+    </div>
+
+    <div th:if="${#lists.isEmpty(posts)}">
+        <p>No blog posts available.</p>
+    </div>
+
+    <div th:unless="${#lists.isEmpty(posts)}">
+        <ul>
+            <li th:each="post : ${posts}">
+                <a th:href="@{/blog/{slug}(slug=${post.slug})}"><h2 th:text="${post.title}">Post Title </h2></a>
+                <p th:text="${post.content}">Post Content</p>
+                <small th:text="${post.date}">Post Date</small>
+            </li>
+        </ul>
+    </div>
+
+    <p><a href="/blog/new">Clicca qui</a> <span>per creare un nuovo post</span></p>
+
+    <a href="/">Go to Home</a>
+</body>
+</html>

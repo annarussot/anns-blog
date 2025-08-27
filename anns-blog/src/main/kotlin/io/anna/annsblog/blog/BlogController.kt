@@ -1,23 +1,31 @@
 ﻿package io.anna.annsblog.blog
 
-import org.springframework.http.ResponseEntity
+import org.springframework.stereotype.Controller
+import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.*
 
-@RestController
-@RequestMapping("/blog")
-class BlogController (
+@Controller
+@RequestMapping("/blog", "/blog/")
+class BlogController(
     private val blogService: BlogService
-){
-    //TODO add pagination
+) {
+    //TODO add private and public pages
+    //TODO add flash attributes
     @GetMapping("")
-    fun blog() = "Blog"
+    fun blog(model: Model): String {
+        model.addAttribute("posts", blogService.getAllPosts())
+        return "blog"
+    }
 
     @GetMapping("/{slug}")
-    @ResponseBody
-    fun blogPost(@PathVariable slug: String) : PostDocument?
-    {
-        return blogService.getPostBySlug(slug)
+    fun blogPost(model: Model, @PathVariable slug: String): String {
+        val doc = blogService.getPostBySlug(slug) ?: return "redirect:/blog?error=Post not found"
+        model.addAttribute("post", doc)
+        return "blog-post"
     }
+
+    @GetMapping("/new")
+    fun newPostForm(): String = "blog-new"
 
     data class BlogPostRequest(
         val title: String,
@@ -25,25 +33,22 @@ class BlogController (
     )
 
     @PostMapping("/new")
-    @ResponseBody
-    fun newPost(@RequestBody request: BlogPostRequest): ResponseEntity<String> {
+    fun newPost(@ModelAttribute request: BlogPostRequest): String {
         print(request)
-        return try {
+        try {
             val doc = blogService.createPost(title = request.title, content = request.content)
-            ResponseEntity.ok("Post created successfully: ${doc.slug}")
+            return "redirect:/blog/${doc.slug}"
         } catch (e: IllegalArgumentException) {
-            ResponseEntity.badRequest().body(e.message)
+            return "redirect:/blog?error=${e.message}"
         }
     }
 
     @DeleteMapping("/delete/{slug}")
-    @ResponseBody
-    fun deletePost(@PathVariable slug: String){
-        if(blogService.deletePost(slug)){
-            ResponseEntity.ok("Post deleted successfully")
-        } else {
-            ResponseEntity.notFound().build()
-        }
-
+    fun deletePost(@PathVariable slug: String): String {
+        val post = blogService.getPostBySlug(slug) ?: return "redirect:/blog?error=Post not found"
+        return if (blogService.deletePost(slug)) {
+            "redirect:/blog?deleted=Post ${post.title} deleted"
+        } else
+            "redirect:/blog?error=Post not found"
     }
 }
